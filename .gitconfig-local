@@ -1,0 +1,6 @@
+# Git Configuration untuk Auto-Push
+# Copy isi ini ke ~/.gitconfig atau jalankan: git config --global alias.pushup '!git add . && git commit -m "Update: $(date +%Y-%m-%d\ %H:%M:%S)" && git push origin main'
+
+[alias]
+    pushup = !git add . && git commit -m "Update: $(date +%Y-%m-%d %H:%M:%S)" && git push origin main
+    quickpush = !git add . && git commit -m "Update" && git push origin main

@@ -2,6 +2,12 @@
 
 Sistem pencatatan dan persetujuan pengajuan barang untuk Yayasan menggunakan Laravel 12 + Filament 5.
 
+## 🔗 Repository GitHub
+
+**GitHub:** https://github.com/mandalap/finance-qinshoo-filament.git
+
+Untuk workflow Git dan cara push update, lihat [GIT-WORKFLOW.md](GIT-WORKFLOW.md)
+
 ## 🎯 Fitur Utama
 
 ### 1. **Public Form (Tanpa Login)**

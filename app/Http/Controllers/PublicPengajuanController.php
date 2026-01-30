@@ -79,4 +79,12 @@ class PublicPengajuanController extends Controller
         $pengajuan = \App\Models\PengajuanBarang::where('nomor_pengajuan', $nomorPengajuan)->firstOrFail();
         return view('public.pengajuan-success', compact('pengajuan'));
     }
+
+    public function print(mixed $uuid)
+    {
+        // Handle uuid logic if passed as Route model binding or raw string
+        $pengajuan = \App\Models\PengajuanBarang::where('uuid', $uuid)->firstOrFail();
+        
+        return view('public.pengajuan-print', compact('pengajuan'));
+    }
 }

@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\PengajuanBarangs\Schemas;
 
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Components\Section;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class PengajuanBarangInfolist
@@ -54,7 +54,29 @@ class PengajuanBarangInfolist
                                     $html .= '<div style="font-weight: 700; color: #667eea; margin-bottom: 8px; font-size: 0.95rem;">' . ($index + 1) . '. ' . e($barang->nama_barang) . '</div>';
                                     $html .= '<div style="margin-bottom: 6px; font-size: 0.9rem;"><strong>Spesifikasi:</strong> ' . e($barang->spesifikasi_barang) . '</div>';
                                     $html .= '<div style="margin-bottom: 6px; font-size: 0.9rem;"><strong>Jumlah:</strong> ' . e($barang->jumlah) . ' ' . e($barang->satuan) . '</div>';
-                                    $html .= '<div style="font-size: 0.9rem;"><strong>Estimasi Harga:</strong> Rp ' . number_format($barang->estimasi_harga, 0, ',', '.') . '</div>';
+                                    $html .= '<div style="margin-bottom: 6px; font-size: 0.9rem;"><strong>Estimasi Harga:</strong> Rp ' . number_format($barang->estimasi_harga, 0, ',', '.') . '</div>';
+                                    
+                                    // Status Badge
+                                    $statusColor = match($barang->status) {
+                                        'approved' => '#d1fae5', // green-100
+                                        'rejected' => '#fee2e2', // red-100
+                                        default => '#fef3c7', // yellow-100
+                                    };
+                                    $statusTextColor = match($barang->status) {
+                                        'approved' => '#065f46', // green-900
+                                        'rejected' => '#991b1b', // red-900
+                                        default => '#92400e', // yellow-800
+                                    };
+                                    $statusLabel = ucfirst($barang->status ?? 'pending');
+                                    
+                                    $html .= '<div style="margin-top: 8px; font-size: 0.85rem;">';
+                                    $html .= '<span style="background-color: '.$statusColor.'; color: '.$statusTextColor.'; padding: 2px 8px; border-radius: 9999px; font-weight: 600;">'.$statusLabel.'</span>';
+                                    
+                                    if ($barang->catatan) {
+                                        $html .= '<div style="margin-top: 4px; color: #666; font-style: italic;">Note: ' . e($barang->catatan) . '</div>';
+                                    }
+                                    $html .= '</div>';
+                                    
                                     $html .= '</div>';
                                 }
                                 

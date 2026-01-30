@@ -50,7 +50,9 @@ class TransaksiKeuanganInfolist
                     ->schema([
                         ImageEntry::make('bukti_path')
                             ->label('')
-                            ->visibility('private')
+                            ->disk('public')
+                            ->visibility('public')
+                            ->openable()
                             ->columnSpanFull()
                             ->hidden(fn ($record) => !$record->bukti_path),
                             

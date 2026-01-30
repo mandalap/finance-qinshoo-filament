@@ -24,6 +24,7 @@ class TransaksiKeuangan extends Model
         'tanggal_transaksi' => 'date',
         'nominal' => 'decimal:2',
         'jenis' => \App\JenisTransaksi::class,
+        'bukti_path' => 'array',
     ];
     
     // Relationships

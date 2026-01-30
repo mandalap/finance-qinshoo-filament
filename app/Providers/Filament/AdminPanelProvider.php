@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('Sistem Keuangan Yayasan')
-            ->favicon(asset('favicon.ico'))
+            ->favicon(asset('favicon.png'))
             ->colors([
                 'primary' => Color::Blue,
                 'success' => Color::Green,
@@ -37,19 +37,13 @@ class AdminPanelProvider extends PanelProvider
                 'info' => Color::Sky,
             ])
             ->font('Inter')
-            ->renderHook(
-                'panels::styles.after',
-                fn () => '<link rel="stylesheet" href="' . asset('build/assets/theme-3YThD4Oh.css') . '">'
-            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Dashboard::class,
+                \App\Filament\Pages\DashboardPage::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                // Default widgets dihapus untuk dashboard yang lebih clean
-            ])
+            // Widget discovery dinonaktifkan, widget hanya ditampilkan melalui DashboardPage
+            // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

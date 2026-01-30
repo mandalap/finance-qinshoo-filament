@@ -11,6 +11,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+
 use Filament\Schemas\Schema;
 
 class TransaksiKeuanganForm
@@ -19,22 +20,37 @@ class TransaksiKeuanganForm
     {
         return $schema
             ->components([
-                Section::make('Informasi Transaksi')
+                Section::make('Data Transaksi')
+                    ->columns(2)
                     ->schema([
                         DatePicker::make('tanggal_transaksi')
                             ->label('Tanggal Transaksi')
                             ->required()
                             ->default(now())
                             ->native(false)
-                            ->displayFormat('d F Y'),
+                            ->displayFormat('d F Y')
+                            ->columnSpan(1),
                             
+                        TextInput::make('nominal')
+                            ->label('Nominal (Rp)')
+                            ->required()
+                            ->numeric()
+                            ->prefix('Rp')
+                            ->minValue(0)
+                            ->step(0.01)
+                            ->mask(\Filament\Support\RawJs::make('$money($input, \'.\', \',\', 2)'))
+                            ->stripCharacters(',')
+                            ->inputMode('decimal')
+                            ->columnSpan(1),
+
                         Select::make('jenis')
                             ->label('Jenis Transaksi')
                             ->options(JenisTransaksi::class)
                             ->required()
                             ->native(false)
                             ->live()
-                            ->afterStateUpdated(fn ($state, callable $set) => $set('kategori_id', null)),
+                            ->afterStateUpdated(fn ($state, callable $set) => $set('kategori_id', null))
+                            ->columnSpan(1),
                             
                         Select::make('kategori_id')
                             ->label('Kategori')
@@ -49,56 +65,41 @@ class TransaksiKeuanganForm
                             })
                             ->required()
                             ->native(false)
-                            ->searchable(),
-                    ])
-                    ->columns(3),
-                    
-                Section::make('Detail Transaksi')
-                    ->schema([
-                        TextInput::make('nominal')
-                            ->label('Nominal (Rp)')
-                            ->required()
-                            ->numeric()
-                            ->prefix('Rp')
-                            ->minValue(0)
-                            ->step(0.01),
-                            
+                            ->searchable()
+                            ->columnSpan(1),
+
                         Textarea::make('deskripsi')
                             ->label('Deskripsi / Keterangan')
                             ->required()
-                            ->rows(4)
+                            ->rows(3)
                             ->columnSpanFull(),
-                    ]),
+                    ])
+                    ->columnSpanFull(),
                     
                 Section::make('Bukti Transaksi')
                     ->schema([
                         FileUpload::make('bukti_path')
                             ->label('Upload Bukti')
-                            ->image()
-                            ->imageEditor()
-                            ->imageEditorAspectRatios([
-                                null,
-                                '16:9',
-                                '4:3',
-                                '1:1',
-                            ])
-                            // Image Optimization
-                            ->resize(1920, 1920)
-                            ->imageResizeMode('contain')
-                            ->imageResizeTargetWidth('1920')
-                            ->imageResizeTargetHeight('1920')
-                            // File Settings
+                            ->multiple()
+                            ->reorderable()
+                            ->appendFiles()
                             ->acceptedFileTypes(['image/*', 'application/pdf'])
-                            ->maxSize(5120) // 5MB
+                            // Kompresi Gambar: Resize ke max 1024px
+                            ->imageResizeMode('contain')
+                            ->imageResizeTargetWidth('1024')
+                            ->imageResizeTargetHeight('1024')
+                            // Batas ukuran file dinaikkan menjadi 50MB
+                            ->maxSize(51200) 
+                            ->disk('public')
                             ->directory('bukti-transaksi')
-                            ->visibility('private')
+                            ->visibility('public')
                             ->downloadable()
                             ->openable()
                             ->previewable()
-                            ->helperText('Upload foto bukti transfer/nota atau file PDF. Gambar akan otomatis diresize (Max: 5MB)'),
-                    ]),
+                            ->helperText('Upload foto bukti transfer/nota atau file PDF. Gambar akan otomatis dikompres. (Max: 50MB)'),
+                    ])
+                    ->columnSpanFull(),
                     
-                // Hidden field untuk created_by (auto-fill dengan user yang login)
                 Hidden::make('created_by')
                     ->default(auth()->id()),
             ]);

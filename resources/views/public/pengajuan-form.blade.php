@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form Pengajuan Barang - Yayasan</title>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <style>
         * {
             margin: 0;
@@ -371,7 +372,15 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Jumlah <span class="required">*</span></label>
-                        <input type="number" name="barang[${barangCount}][jumlah]" min="1" required>
+                        <input type="text" 
+                               id="jumlah_display_${barangCount}" 
+                               class="jumlah-input" 
+                               placeholder="0" 
+                               required
+                               oninput="formatNumber(this, ${barangCount})">
+                        <input type="hidden" 
+                               name="barang[${barangCount}][jumlah]" 
+                               id="jumlah_${barangCount}">
                     </div>
                     
                     <div class="form-group">
@@ -382,7 +391,15 @@
                 
                 <div class="form-group">
                     <label>Estimasi Harga (Rp) <span class="required">*</span></label>
-                    <input type="number" name="barang[${barangCount}][estimasi_harga]" min="0" step="0.01" required>
+                    <input type="text" 
+                           id="estimasi_harga_display_${barangCount}" 
+                           class="estimasi-harga-input" 
+                           placeholder="0" 
+                           required
+                           oninput="formatCurrency(this, ${barangCount})">
+                    <input type="hidden" 
+                           name="barang[${barangCount}][estimasi_harga]" 
+                           id="estimasi_harga_${barangCount}">
                 </div>
             `;
             
@@ -406,6 +423,40 @@
                     numberSpan.textContent = `Barang #${index + 1}`;
                 }
             });
+        }
+        
+        function formatCurrency(input, barangId) {
+            // Get the input value and remove all non-digit characters
+            let value = input.value.replace(/\D/g, '');
+            
+            // Convert to number
+            let numValue = parseInt(value) || 0;
+            
+            // Format with thousand separators (dots)
+            let formatted = numValue.toLocaleString('id-ID');
+            
+            // Update display input
+            input.value = formatted;
+            
+            // Update hidden input with raw number
+            document.getElementById(`estimasi_harga_${barangId}`).value = numValue;
+        }
+        
+        function formatNumber(input, barangId) {
+            // Get the input value and remove all non-digit characters
+            let value = input.value.replace(/\D/g, '');
+            
+            // Convert to number
+            let numValue = parseInt(value) || 0;
+            
+            // Format with thousand separators (dots)
+            let formatted = numValue.toLocaleString('id-ID');
+            
+            // Update display input
+            input.value = formatted;
+            
+            // Update hidden input with raw number
+            document.getElementById(`jumlah_${barangId}`).value = numValue;
         }
     </script>
 </body>

@@ -15,11 +15,37 @@ class KeuanganChartWidget extends ChartWidget
     
     protected static ?int $sort = 2;
     
-    // Polling setiap 30 detik untuk update otomatis
-    protected ?string $pollingInterval = '30s';
+    // Disable polling untuk performa lebih baik
+    protected ?string $pollingInterval = null;
     
     public ?string $startDate = null;
     public ?string $endDate = null;
+    
+    // Lazy loading untuk performa
+    protected static bool $isLazy = true;
+
+    public function mount(): void
+    {
+        // Ambil filter dari session jika ada
+        $filter = session('dashboard_filter', []);
+        $this->startDate = $filter['startDate'] ?? null;
+        $this->endDate = $filter['endDate'] ?? null;
+    }
+    
+    protected function getListeners(): array
+    {
+        return [
+            'refresh-widgets' => 'refreshData',
+        ];
+    }
+    
+    public function refreshData(): void
+    {
+        // Baca ulang filter dari session
+        $filter = session('dashboard_filter', []);
+        $this->startDate = $filter['startDate'] ?? null;
+        $this->endDate = $filter['endDate'] ?? null;
+    }
 
     protected function getData(): array
     {
@@ -27,33 +53,39 @@ class KeuanganChartWidget extends ChartWidget
         $pemasukan = [];
         $pengeluaran = [];
         
-        // Optimasi: Single query untuk semua bulan sekaligus
-        $startMonth = now()->subMonths(5);
-        $endMonth = now();
+        // Jika ada filter custom, gunakan range tersebut
+        if ($this->startDate && $this->endDate) {
+            $startMonth = Carbon::parse($this->startDate)->startOfMonth();
+            $endMonth = Carbon::parse($this->endDate)->endOfMonth();
+        } else {
+            // Default: 6 bulan terakhir
+            $startMonth = now()->subMonths(5);
+            $endMonth = now();
+        }
         
-        // Query optimized dengan groupBy
-        $monthlyData = TransaksiKeuangan::selectRaw("
+        // Query optimized dengan groupBy (SQLite compatible)
+        $query = TransaksiKeuangan::selectRaw("
             YEAR(tanggal_transaksi) as tahun,
             MONTH(tanggal_transaksi) as bulan,
             SUM(CASE WHEN jenis = 'pemasukan' THEN nominal ELSE 0 END) as pemasukan,
             SUM(CASE WHEN jenis = 'pengeluaran' THEN nominal ELSE 0 END) as pengeluaran
         ")
-        ->where(function($query) use ($startMonth, $endMonth) {
-            $query->whereBetween('tanggal_transaksi', [
-                $startMonth->startOfMonth(),
-                $endMonth->endOfMonth()
-            ]);
-            
-            // Terapkan filter tanggal jika ada
-            if ($this->startDate) {
-                $query->whereDate('tanggal_transaksi', '>=', $this->startDate);
-            }
-            
-            if ($this->endDate) {
-                $query->whereDate('tanggal_transaksi', '<=', $this->endDate);
-            }
-        })
-        ->groupBy('tahun', 'bulan')
+        ->whereBetween('tanggal_transaksi', [
+            $startMonth->startOfMonth(),
+            $endMonth->endOfMonth()
+        ]);
+        
+        // Terapkan filter tanggal jika ada
+        if ($this->startDate) {
+            $query->whereDate('tanggal_transaksi', '>=', $this->startDate);
+        }
+        
+        if ($this->endDate) {
+            $query->whereDate('tanggal_transaksi', '<=', $this->endDate);
+        }
+        
+        $monthlyData = $query
+        ->groupByRaw("YEAR(tanggal_transaksi), MONTH(tanggal_transaksi)")
         ->orderBy('tahun', 'asc')
         ->orderBy('bulan', 'asc')
         ->get()
@@ -119,25 +151,6 @@ class KeuanganChartWidget extends ChartWidget
                     ],
                 ],
             ],
-        ];
-    }
-    
-    protected function getFiltersForm(): ?array
-    {
-        return [
-            Section::make('Filter Periode')
-                ->schema([
-                    DatePicker::make('startDate')
-                        ->label('Dari Tanggal')
-                        ->native(false)
-                        ->displayFormat('d M Y'),
-                    DatePicker::make('endDate')
-                        ->label('Sampai Tanggal')
-                        ->native(false)
-                        ->displayFormat('d M Y'),
-                ])
-                ->columns(2)
-                ->collapsible(),
         ];
     }
 }

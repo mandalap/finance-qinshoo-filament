@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -139,6 +140,12 @@ class TransaksiKeuangansTable
             ])
             ->recordActions([
                 ViewAction::make(),
+                Action::make('cetak')
+                    ->label('Cetak Bukti')
+                    ->icon('heroicon-o-printer')
+                    ->color('secondary')
+                    ->url(fn ($record) => route('transaksi.print', $record->id))
+                    ->openUrlInNewTab(),
                 EditAction::make(),
             ])
             ->toolbarActions([

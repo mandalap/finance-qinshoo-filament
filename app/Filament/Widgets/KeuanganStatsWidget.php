@@ -13,11 +13,37 @@ class KeuanganStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 1;
     
-    // Polling setiap 30 detik untuk update otomatis
-    protected ?string $pollingInterval = '30s';
+    // Disable polling untuk performa lebih baik
+    protected ?string $pollingInterval = null;
     
     public ?string $startDate = null;
     public ?string $endDate = null;
+    
+    // Lazy loading untuk performa
+    protected static bool $isLazy = true;
+    
+    public function mount(): void
+    {
+        // Ambil filter dari session jika ada
+        $filter = session('dashboard_filter', []);
+        $this->startDate = $filter['startDate'] ?? null;
+        $this->endDate = $filter['endDate'] ?? null;
+    }
+    
+    protected function getListeners(): array
+    {
+        return [
+            'refresh-widgets' => 'refreshData',
+        ];
+    }
+    
+    public function refreshData(): void
+    {
+        // Baca ulang filter dari session
+        $filter = session('dashboard_filter', []);
+        $this->startDate = $filter['startDate'] ?? null;
+        $this->endDate = $filter['endDate'] ?? null;
+    }
     
     protected function getStats(): array
     {
@@ -62,7 +88,7 @@ class KeuanganStatsWidget extends BaseWidget
                    ->whereYear('tanggal_transaksi', $bulanLalu->year);
             });
         })
-        ->groupBy('bulan', 'tahun')
+        ->groupByRaw("MONTH(tanggal_transaksi), YEAR(tanggal_transaksi)")
         ->get()
         ->keyBy(function($item) {
             return $item->tahun . '-' . $item->bulan;
@@ -124,25 +150,6 @@ class KeuanganStatsWidget extends BaseWidget
                 )
                 ->descriptionIcon($perubahanPengeluaran >= 0 ? 'heroicon-o-arrow-trending-up' : 'heroicon-o-arrow-trending-down')
                 ->color('danger'),
-        ];
-    }
-    
-    protected function getFiltersForm(): ?array
-    {
-        return [
-            Section::make('Filter Periode')
-                ->schema([
-                    DatePicker::make('startDate')
-                        ->label('Dari Tanggal')
-                        ->native(false)
-                        ->displayFormat('d M Y'),
-                    DatePicker::make('endDate')
-                        ->label('Sampai Tanggal')
-                        ->native(false)
-                        ->displayFormat('d M Y'),
-                ])
-                ->columns(2)
-                ->collapsible(),
         ];
     }
 }

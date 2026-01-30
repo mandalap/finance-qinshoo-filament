@@ -9,6 +9,7 @@ class PengajuanBarang extends Model
     protected $table = 'pengajuan_barang';
     
     protected $fillable = [
+        'uuid',
         'nomor_pengajuan',
         'tanggal_pengajuan',
         'nama_pengaju',
@@ -57,7 +58,16 @@ class PengajuanBarang extends Model
             if (empty($model->tanggal_pengajuan)) {
                 $model->tanggal_pengajuan = now();
             }
+
+            if (empty($model->uuid)) {
+                $model->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
         });
+    }
+
+    public function getRouteKeyName()
+    {
+        return 'uuid';
     }
     
     public static function generateNomorPengajuan(): string

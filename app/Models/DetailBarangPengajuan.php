@@ -15,6 +15,8 @@ class DetailBarangPengajuan extends Model
         'jumlah',
         'satuan',
         'estimasi_harga',
+        'status',
+        'catatan',
     ];
     
     protected $casts = [

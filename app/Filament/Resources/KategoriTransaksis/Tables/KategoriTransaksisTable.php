@@ -23,6 +23,12 @@ class KategoriTransaksisTable
                 TextColumn::make('jenis')
                     ->label('Jenis')
                     ->badge()
+                    ->color(fn ($state): string => match ($state instanceof \App\JenisTransaksi ? $state->value : $state) {
+                        'pemasukan' => 'success',
+                        'pengeluaran' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn ($state): string => ucfirst($state instanceof \App\JenisTransaksi ? $state->value : $state))
                     ->searchable()
                     ->sortable(),
                     

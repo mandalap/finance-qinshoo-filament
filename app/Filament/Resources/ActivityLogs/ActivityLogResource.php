@@ -30,6 +30,18 @@ class ActivityLogResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'description';
 
+    // Only show navigation for super admin
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasRole('super_admin') ?? false;
+    }
+
+    // Block direct access if not super admin
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasRole('super_admin') ?? false;
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return ActivityLogInfolist::configure($schema);

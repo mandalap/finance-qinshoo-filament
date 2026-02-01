@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Budget extends Model
 {
@@ -12,6 +13,7 @@ class Budget extends Model
     protected $table = 'budgets';
     
     protected $fillable = [
+        'uuid',
         'kategori_id',
         'tahun',
         'bulan',
@@ -26,6 +28,24 @@ class Budget extends Model
         'nominal_budget' => 'decimal:2',
         'is_active' => 'boolean',
     ];
+    
+    // Use UUID for route model binding
+    public function getRouteKeyName()
+    {
+        return 'uuid';
+    }
+    
+    // Auto-generate UUID on creation
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::uuid();
+            }
+        });
+    }
     
     // Relationships
     public function kategori()

@@ -43,16 +43,18 @@ class BudgetsTable
                 TextColumn::make('realisasi')
                     ->label('Realisasi')
                     ->money('IDR')
-                    ->sortable(),
+                    ->sortable(false),
                     
-                TextColumn::make('sisa')
+                TextColumn::make('sisa_budget')
                     ->label('Sisa')
                     ->money('IDR')
+                    ->sortable(false)
                     ->color(fn ($state) => $state < 0 ? 'danger' : 'success'),
                     
-                TextColumn::make('persentase_terpakai')
+                TextColumn::make('persentase_realisasi')
                     ->label('% Terpakai')
-                    ->suffix('%')
+                    ->sortable(false)
+                    ->formatStateUsing(fn ($state) => number_format($state, 1) . '%')
                     ->color(fn ($state) => match(true) {
                         $state >= 100 => 'danger',
                         $state >= 80 => 'warning',

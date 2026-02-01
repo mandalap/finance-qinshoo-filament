@@ -22,6 +22,7 @@ class DashboardPage extends BaseDashboard
         // Performance: LCP ~8-10s (acceptable untuk data lengkap)
         return [
             \App\Filament\Widgets\KeuanganStatsWidget::class,
+            \App\Filament\Widgets\BudgetStatsWidget::class,
             \App\Filament\Widgets\PengajuanBarangStatsWidget::class,
             \App\Filament\Widgets\KeuanganChartWidget::class,
             \App\Filament\Widgets\KategoriPemasukanChart::class,

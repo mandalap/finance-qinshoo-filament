@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Filament\Resources\Budgets\Pages;
 
 use App\Filament\Resources\Budgets\BudgetResource;
@@ -14,6 +15,13 @@ class ListBudgets extends ListRecords
     {
         return [
             CreateAction::make(),
+        ];
+    }
+    
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            \App\Filament\Widgets\BudgetStatsWidget::class,
         ];
     }
 }

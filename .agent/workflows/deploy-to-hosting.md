@@ -322,6 +322,61 @@ git reset --hard origin/main
 php artisan storage:link
 ```
 
+### ⚠️ Error: 403 Forbidden Setelah Login
+
+**Gejala:**
+- Halaman utama & login tampil normal
+- Setelah login → 403 Forbidden
+- File `storage/logs/laravel.log` kosong
+
+**Solusi Cepat:**
+
+```bash
+# 1. Jalankan script otomatis
+bash fix-403-complete.sh
+
+# 2. Atau manual:
+chmod -R 775 storage bootstrap/cache
+mkdir -p storage/framework/sessions
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+php artisan config:cache
+php artisan route:cache
+php artisan storage:link
+```
+
+**Periksa .env:**
+```env
+APP_URL=https://yourdomain.com
+SESSION_DOMAIN=yourdomain.com
+SESSION_SECURE_COOKIE=true  # false jika HTTP
+```
+
+**Test Permission:**
+```bash
+# Upload file public/test-permission.php ke hosting
+# Akses: https://yourdomain.com/test-permission.php
+# Hapus setelah testing!
+```
+
+**Disable ModSecurity** (jika perlu):
+
+Edit `public/.htaccess`, tambahkan di paling atas:
+```apache
+<IfModule mod_security.c>
+    SecRuleEngine Off
+</IfModule>
+```
+
+**Cek Error Log Web Server:**
+```bash
+tail -50 ~/logs/error_log
+```
+
+**📚 Panduan Lengkap:** Lihat file `HOSTING-403-SOLUTION.md`
+
 ---
 
 ## 📝 Checklist Deploy

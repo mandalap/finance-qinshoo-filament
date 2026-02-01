@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class PengajuanBarang extends Model
 {
+    use SoftDeletes, LogsActivity;
     protected $table = 'pengajuan_barang';
     
     protected $fillable = [
@@ -68,6 +72,16 @@ class PengajuanBarang extends Model
     public function getRouteKeyName()
     {
         return 'uuid';
+    }
+    
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['nomor_pengajuan', 'status', 'catatan_persetujuan', 'disetujui_oleh', 'tanggal_persetujuan'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Pengajuan {$eventName}")
+            ->useLogName('pengajuan_barang');
     }
     
     public static function generateNomorPengajuan(): string

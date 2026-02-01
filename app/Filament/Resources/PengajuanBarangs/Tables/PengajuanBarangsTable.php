@@ -24,6 +24,8 @@ class PengajuanBarangsTable
     public static function configure(Table $table): Table
     {
         return $table
+            // PERFORMANCE FIX: Eager load relationships untuk avoid N+1 query
+            ->modifyQueryUsing(fn ($query) => $query->with(['detailBarang', 'approver']))
             ->columns([
                 TextColumn::make('nomor_pengajuan')
                     ->label('No. Pengajuan')

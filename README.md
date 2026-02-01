@@ -150,14 +150,41 @@ Format: `PB/YYYY/MM/XXXX`
 3. Sistem update status, approver, tanggal, dan catatan
 4. Hanya pengajuan **APPROVED** yang dianggap sah
 
+## ⭐ FITUR BARU (v2.0.0 - 31 Jan 2026)
+
+### 🔥 5 Fitur Krusial Telah Ditambahkan!
+
+1. ✅ **Activity Log (Audit Trail)** - Tracking semua perubahan data
+2. ✅ **Notification System** - Email notifikasi untuk approval workflow
+3. ✅ **Backup System** - Automated backup database & files
+4. ✅ **Enhanced Validation** - Validasi bisnis yang lebih ketat
+5. ✅ **Budget Management** - Manajemen budget per kategori dengan monitoring
+
+📖 **Dokumentasi Lengkap**: Lihat file `FITUR-BARU.md`  
+⚡ **Quick Start**: Lihat file `QUICK-START-FITUR-BARU.md`
+
+### Setup Fitur Baru
+```bash
+# 1. Jalankan migration
+php artisan migrate
+
+# 2. Setup email di .env (untuk notifikasi)
+# 3. Test backup
+php artisan backup:run --only-db
+```
+
 ## 🔄 Pengembangan Selanjutnya (Opsional)
 
-- [ ] Dashboard widget jumlah pengajuan pending
-- [ ] Notifikasi email/WhatsApp saat ada pengajuan baru
-- [ ] Export laporan Excel/PDF
+- [x] ~~Dashboard widget jumlah pengajuan pending~~ ✅ DONE
+- [x] ~~Notifikasi email saat ada pengajuan baru~~ ✅ DONE
+- [x] ~~Export laporan Excel~~ ✅ DONE (filament-excel)
+- [x] ~~History log perubahan status~~ ✅ DONE (Activity Log)
+- [x] ~~Budget Management~~ ✅ DONE
 - [ ] Approval bertingkat (multi-level)
-- [ ] History log perubahan status
 - [ ] Upload attachment/dokumen pendukung
+- [ ] WhatsApp notification
+- [ ] Advanced reporting (PDF)
+- [ ] Mobile app
 
 ## 👨‍💻 Developer
 

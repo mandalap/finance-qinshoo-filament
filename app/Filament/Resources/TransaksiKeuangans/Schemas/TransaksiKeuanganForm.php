@@ -94,7 +94,6 @@ class TransaksiKeuanganForm
                             ->directory('bukti-transaksi')
                             ->visibility('public')
                             ->downloadable()
-                            ->openable()
                             ->previewable()
                             ->helperText('Upload foto bukti transfer/nota atau file PDF. Gambar akan otomatis dikompres. (Max: 50MB)'),
                     ])

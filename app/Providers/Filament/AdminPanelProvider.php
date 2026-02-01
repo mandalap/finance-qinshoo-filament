@@ -42,6 +42,12 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 \App\Filament\Pages\DashboardPage::class,
             ])
+            ->userMenuItems([
+                'profile' => \Filament\Navigation\MenuItem::make()
+                    ->label('Profile')
+                    ->url(fn (): string => \App\Filament\Pages\EditProfile::getUrl())
+                    ->icon('heroicon-o-user-circle'),
+            ])
             // Widget discovery dinonaktifkan, widget hanya ditampilkan melalui DashboardPage
             // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->middleware([

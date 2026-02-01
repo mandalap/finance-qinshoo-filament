@@ -3,9 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class KategoriTransaksi extends Model
 {
+    use SoftDeletes, LogsActivity;
     protected $table = 'kategori_transaksi';
     
     protected $fillable = [
@@ -40,5 +44,15 @@ class KategoriTransaksi extends Model
     public function scopePengeluaran($query)
     {
         return $query->where('jenis', 'pengeluaran');
+    }
+    
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['nama', 'jenis', 'deskripsi', 'is_active'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Kategori {$eventName}")
+            ->useLogName('kategori_transaksi');
     }
 }

@@ -33,6 +33,26 @@ class PengajuanBarangResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'nomor_pengajuan';
+    
+    public static function getNavigationBadge(): ?string
+    {
+        return (string) PengajuanBarang::where('status', 'pending')->count();
+    }
+    
+    public static function getNavigationBadgeColor(): ?string
+    {
+        $count = PengajuanBarang::where('status', 'pending')->count();
+        
+        if ($count > 10) {
+            return 'danger'; // Merah jika lebih dari 10
+        } elseif ($count > 5) {
+            return 'warning'; // Kuning jika lebih dari 5
+        } elseif ($count > 0) {
+            return 'info'; // Biru jika ada pending
+        }
+        
+        return 'success'; // Hijau jika tidak ada pending
+    }
 
     public static function form(Schema $schema): Schema
     {

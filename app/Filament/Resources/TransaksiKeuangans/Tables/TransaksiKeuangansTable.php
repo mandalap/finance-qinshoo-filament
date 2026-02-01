@@ -22,6 +22,8 @@ class TransaksiKeuangansTable
     public static function configure(Table $table): Table
     {
         return $table
+            // PERFORMANCE FIX: Eager load relationships untuk avoid N+1 query
+            ->modifyQueryUsing(fn ($query) => $query->with(['kategori', 'creator']))
             ->columns([
                 TextColumn::make('nomor_transaksi')
                     ->label('No. Transaksi')
@@ -151,8 +153,22 @@ class TransaksiKeuangansTable
             ->toolbarActions([
                 ExportAction::make()
                     ->exports([
-                        ExcelExport::make()
+                        ExcelExport::make('table')
                             ->fromTable()
+                            ->only([
+                                'nomor_transaksi',
+                                'tanggal_transaksi',
+                                'jenis',
+                                'kategori.nama',
+                                'deskripsi',
+                                'creator.name',
+                                'created_at',
+                            ])
+                            ->withColumns([
+                                \pxlrbt\FilamentExcel\Columns\Column::make('nominal')
+                                    ->heading('Nominal')
+                                    ->formatStateUsing(fn ($state) => $state),
+                            ])
                             ->withFilename(fn () => 'transaksi-keuangan-' . date('Y-m-d'))
                             ->withWriterType(\Maatwebsite\Excel\Excel::XLSX),
                     ]),

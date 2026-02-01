@@ -47,26 +47,31 @@ class KeuanganStatsWidget extends BaseWidget
     
     protected function getStats(): array
     {
-        // Optimasi: Gunakan single query dengan conditional aggregation
-        $query = TransaksiKeuangan::query();
+        // Cache key berdasarkan filter
+        $cacheKey = 'keuangan_stats_' . md5(($this->startDate ?? '') . '_' . ($this->endDate ?? ''));
         
-        if ($this->startDate) {
-            $query->whereDate('tanggal_transaksi', '>=', $this->startDate);
-        }
-        
-        if ($this->endDate) {
-            $query->whereDate('tanggal_transaksi', '<=', $this->endDate);
-        }
-        
-        // Single query untuk mendapatkan semua data sekaligus
-        $stats = $query->selectRaw("
-            SUM(CASE WHEN jenis = 'pemasukan' THEN nominal ELSE 0 END) as total_pemasukan,
-            SUM(CASE WHEN jenis = 'pengeluaran' THEN nominal ELSE 0 END) as total_pengeluaran
-        ")->first();
-        
-        $totalPemasukan = $stats->total_pemasukan ?? 0;
-        $totalPengeluaran = $stats->total_pengeluaran ?? 0;
-        $saldo = $totalPemasukan - $totalPengeluaran;
+        // Cache selama 5 menit
+        return cache()->remember($cacheKey, 300, function () {
+            // Optimasi: Gunakan single query dengan conditional aggregation
+            $query = TransaksiKeuangan::query();
+            
+            if ($this->startDate) {
+                $query->whereDate('tanggal_transaksi', '>=', $this->startDate);
+            }
+            
+            if ($this->endDate) {
+                $query->whereDate('tanggal_transaksi', '<=', $this->endDate);
+            }
+            
+            // Single query untuk mendapatkan semua data sekaligus
+            $stats = $query->selectRaw("
+                SUM(CASE WHEN jenis = 'pemasukan' THEN nominal ELSE 0 END) as total_pemasukan,
+                SUM(CASE WHEN jenis = 'pengeluaran' THEN nominal ELSE 0 END) as total_pengeluaran
+            ")->first();
+            
+            $totalPemasukan = $stats->total_pemasukan ?? 0;
+            $totalPengeluaran = $stats->total_pengeluaran ?? 0;
+            $saldo = $totalPemasukan - $totalPengeluaran;
         
         // Query untuk bulan ini dan bulan lalu (optimized)
         $bulanIni = now();
@@ -151,5 +156,6 @@ class KeuanganStatsWidget extends BaseWidget
                 ->descriptionIcon($perubahanPengeluaran >= 0 ? 'heroicon-o-arrow-trending-up' : 'heroicon-o-arrow-trending-down')
                 ->color('danger'),
         ];
+        }); // Close cache()->remember()
     }
 }

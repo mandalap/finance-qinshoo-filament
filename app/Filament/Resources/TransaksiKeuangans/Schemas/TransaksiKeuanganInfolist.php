@@ -52,7 +52,6 @@ class TransaksiKeuanganInfolist
                             ->label('')
                             ->disk('public')
                             ->visibility('public')
-                            ->openable()
                             ->columnSpanFull()
                             ->hidden(fn ($record) => !$record->bukti_path),
                             

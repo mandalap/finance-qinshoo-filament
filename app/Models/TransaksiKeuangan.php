@@ -3,10 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class TransaksiKeuangan extends Model
 {
+    use SoftDeletes, LogsActivity;
     protected $table = 'transaksi_keuangan';
     
     protected $fillable = [
@@ -83,6 +87,22 @@ class TransaksiKeuangan extends Model
         });
     }
     
+    public function getRouteKeyName()
+    {
+        return 'nomor_transaksi';
+    }
+    
+    
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly(['nomor_transaksi', 'tanggal_transaksi', 'jenis', 'kategori_id', 'nominal', 'deskripsi'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn(string $eventName) => "Transaksi {$eventName}")
+            ->useLogName('transaksi_keuangan');
+    }
+    
     public static function generateNomorTransaksi()
     {
         $year = date('Y');
@@ -95,6 +115,7 @@ class TransaksiKeuangan extends Model
         
         $sequence = $lastTransaksi ? intval(substr($lastTransaksi->nomor_transaksi, -4)) + 1 : 1;
         
-        return sprintf('TRX/%s/%s/%04d', $year, $month, $sequence);
+        // Format: TRX-YYYY-MM-NNNN (URL-safe dengan dash)
+        return sprintf('TRX-%s-%s-%04d', $year, $month, $sequence);
     }
 }

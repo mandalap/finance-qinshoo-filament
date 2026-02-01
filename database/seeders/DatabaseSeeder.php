@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         // Run RoleSeeder
         $this->call([
             RoleSeeder::class,
+            KategoriTransaksiSeeder::class,
         ]);
     }
 }

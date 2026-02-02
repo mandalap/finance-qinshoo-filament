@@ -107,17 +107,18 @@ class TransaksiKeuangan extends Model
     {
         $year = date('Y');
         $month = date('m');
-        
+
         // Try to generate sequential number first
         $nomorTransaksi = \DB::transaction(function () use ($year, $month) {
-            // Use lockForUpdate to prevent race conditions
-            $lastTransaksi = static::whereYear('created_at', $year)
+            // ✅ FIX: Tambah withTrashed() supaya data soft-deleted ikut dihitung
+            $lastTransaksi = static::withTrashed()
+                ->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->whereRaw("nomor_transaksi REGEXP '^TRX-[0-9]{4}-[0-9]{2}-[0-9]{4}$'")
-                ->orderBy('nomor_transaksi', 'desc')
+                ->orderByRaw('CAST(SUBSTRING(nomor_transaksi, -4) AS UNSIGNED) DESC')
                 ->lockForUpdate()
                 ->first();
-            
+
             if ($lastTransaksi) {
                 // Extract sequence from last transaction number
                 $lastNumber = $lastTransaksi->nomor_transaksi;
@@ -125,21 +126,23 @@ class TransaksiKeuangan extends Model
             } else {
                 $sequence = 1;
             }
-            
+
             // Format: TRX-YYYY-MM-NNNN
             return sprintf('TRX-%s-%s-%04d', $year, $month, $sequence);
         });
-        
-        // Check if this number already exists (race condition check)
-        $exists = static::where('nomor_transaksi', $nomorTransaksi)->exists();
-        
+
+        // ✅ FIX: Pengecekan exists juga harus pakai withTrashed()
+        $exists = static::withTrashed()
+            ->where('nomor_transaksi', $nomorTransaksi)
+            ->exists();
+
         if ($exists) {
             // If duplicate, add microsecond timestamp suffix
             $microtime = (int)(microtime(true) * 10000);
             $suffix = base_convert($microtime, 10, 36);
             return sprintf('TRX-%s-%s-%s', $year, $month, strtoupper($suffix));
         }
-        
+
         return $nomorTransaksi;
     }
 }

@@ -82,7 +82,30 @@ class TransaksiKeuangan extends Model
         
         static::creating(function ($transaksi) {
             if (empty($transaksi->nomor_transaksi)) {
-                $transaksi->nomor_transaksi = static::generateNomorTransaksi();
+                $maxRetries = 5;
+                $attempt = 0;
+                
+                while ($attempt < $maxRetries) {
+                    $nomorTransaksi = static::generateNomorTransaksi();
+                    
+                    // Check if this number already exists
+                    $exists = static::where('nomor_transaksi', $nomorTransaksi)->exists();
+                    
+                    if (!$exists) {
+                        $transaksi->nomor_transaksi = $nomorTransaksi;
+                        break;
+                    }
+                    
+                    $attempt++;
+                    
+                    // If still duplicate after retries, add random suffix
+                    if ($attempt >= $maxRetries) {
+                        $transaksi->nomor_transaksi = $nomorTransaksi . '-' . strtoupper(substr(uniqid(), -4));
+                    }
+                    
+                    // Small delay to avoid race condition
+                    usleep(100000); // 100ms
+                }
             }
         });
     }
@@ -105,17 +128,21 @@ class TransaksiKeuangan extends Model
     
     public static function generateNomorTransaksi()
     {
-        $year = date('Y');
-        $month = date('m');
-        
-        $lastTransaksi = static::whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->orderBy('id', 'desc')
-            ->first();
-        
-        $sequence = $lastTransaksi ? intval(substr($lastTransaksi->nomor_transaksi, -4)) + 1 : 1;
-        
-        // Format: TRX-YYYY-MM-NNNN (URL-safe dengan dash)
-        return sprintf('TRX-%s-%s-%04d', $year, $month, $sequence);
+        return \DB::transaction(function () {
+            $year = date('Y');
+            $month = date('m');
+            
+            // Use lockForUpdate to prevent race conditions
+            $lastTransaksi = static::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->orderBy('nomor_transaksi', 'desc')
+                ->lockForUpdate()
+                ->first();
+            
+            $sequence = $lastTransaksi ? intval(substr($lastTransaksi->nomor_transaksi, -4)) + 1 : 1;
+            
+            // Format: TRX-YYYY-MM-NNNN (URL-safe dengan dash)
+            return sprintf('TRX-%s-%s-%04d', $year, $month, $sequence);
+        });
     }
 }

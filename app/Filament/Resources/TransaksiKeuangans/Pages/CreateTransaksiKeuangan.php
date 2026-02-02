@@ -46,4 +46,13 @@ class CreateTransaksiKeuangan extends CreateRecord
         // This should never be reached, but just in case
         return parent::handleRecordCreation($data);
     }
+    
+    protected function afterCreate(): void
+    {
+        // Clear cache untuk widget stats
+        cache()->forget('keuangan_stats_' . md5('_'));
+        
+        // Dispatch event untuk refresh widgets di dashboard
+        $this->dispatch('refresh-widgets');
+    }
 }

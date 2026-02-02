@@ -13,8 +13,8 @@ class KeuanganStatsWidget extends BaseWidget
 {
     protected static ?int $sort = 1;
     
-    // Disable polling untuk performa lebih baik
-    protected ?string $pollingInterval = null;
+    // Enable polling untuk auto-refresh setiap 30 detik
+    protected static ?string $pollingInterval = '30s';
     
     public ?string $startDate = null;
     public ?string $endDate = null;
@@ -50,8 +50,8 @@ class KeuanganStatsWidget extends BaseWidget
         // Cache key berdasarkan filter
         $cacheKey = 'keuangan_stats_' . md5(($this->startDate ?? '') . '_' . ($this->endDate ?? ''));
         
-        // Cache selama 5 menit
-        return cache()->remember($cacheKey, 300, function () {
+        // Cache selama 30 detik (sesuai polling interval)
+        return cache()->remember($cacheKey, 30, function () {
             // Optimasi: Gunakan single query dengan conditional aggregation
             $query = TransaksiKeuangan::query();
             

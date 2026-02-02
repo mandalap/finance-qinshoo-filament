@@ -14,7 +14,8 @@ class KeuanganStatsWidget extends BaseWidget
     protected static ?int $sort = 1;
     
     // Enable polling untuk auto-refresh setiap 30 detik
-    protected static ?string $pollingInterval = '30s';
+    protected ?string $pollingInterval = '30s';
+
     
     public ?string $startDate = null;
     public ?string $endDate = null;

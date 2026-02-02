@@ -33,13 +33,25 @@ class ActivityLogResource extends Resource
     // Only show navigation for super admin
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole('super_admin') ?? false;
+        $user = auth()->user();
+        if (!$user) {
+            return false;
+        }
+        
+        // Allow if user has super_admin role OR is user ID 1 (first admin)
+        return $user->hasRole('super_admin') || $user->id === 1;
     }
 
     // Block direct access if not super admin
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasRole('super_admin') ?? false;
+        $user = auth()->user();
+        if (!$user) {
+            return false;
+        }
+        
+        // Allow if user has super_admin role OR is user ID 1 (first admin)
+        return $user->hasRole('super_admin') || $user->id === 1;
     }
 
     public static function infolist(Schema $schema): Schema

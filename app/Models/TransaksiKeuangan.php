@@ -135,11 +135,18 @@ class TransaksiKeuangan extends Model
             // Use lockForUpdate to prevent race conditions
             $lastTransaksi = static::whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
+                ->whereRaw("nomor_transaksi REGEXP '^TRX-[0-9]{4}-[0-9]{2}-[0-9]{4}$'")
                 ->orderBy('nomor_transaksi', 'desc')
                 ->lockForUpdate()
                 ->first();
             
-            $sequence = $lastTransaksi ? intval(substr($lastTransaksi->nomor_transaksi, -4)) + 1 : 1;
+            if ($lastTransaksi) {
+                // Extract sequence from last transaction number
+                $lastNumber = $lastTransaksi->nomor_transaksi;
+                $sequence = intval(substr($lastNumber, -4)) + 1;
+            } else {
+                $sequence = 1;
+            }
             
             // Format: TRX-YYYY-MM-NNNN (URL-safe dengan dash)
             return sprintf('TRX-%s-%s-%04d', $year, $month, $sequence);

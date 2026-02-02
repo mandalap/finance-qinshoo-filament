@@ -82,30 +82,7 @@ class TransaksiKeuangan extends Model
         
         static::creating(function ($transaksi) {
             if (empty($transaksi->nomor_transaksi)) {
-                $maxRetries = 5;
-                $attempt = 0;
-                
-                while ($attempt < $maxRetries) {
-                    $nomorTransaksi = static::generateNomorTransaksi();
-                    
-                    // Check if this number already exists
-                    $exists = static::where('nomor_transaksi', $nomorTransaksi)->exists();
-                    
-                    if (!$exists) {
-                        $transaksi->nomor_transaksi = $nomorTransaksi;
-                        break;
-                    }
-                    
-                    $attempt++;
-                    
-                    // If still duplicate after retries, add random suffix
-                    if ($attempt >= $maxRetries) {
-                        $transaksi->nomor_transaksi = $nomorTransaksi . '-' . strtoupper(substr(uniqid(), -4));
-                    }
-                    
-                    // Small delay to avoid race condition
-                    usleep(100000); // 100ms
-                }
+                $transaksi->nomor_transaksi = static::generateNomorTransaksi();
             }
         });
     }
@@ -128,10 +105,11 @@ class TransaksiKeuangan extends Model
     
     public static function generateNomorTransaksi()
     {
-        return \DB::transaction(function () {
-            $year = date('Y');
-            $month = date('m');
-            
+        $year = date('Y');
+        $month = date('m');
+        
+        // Try to generate sequential number first
+        $nomorTransaksi = \DB::transaction(function () use ($year, $month) {
             // Use lockForUpdate to prevent race conditions
             $lastTransaksi = static::whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
@@ -148,8 +126,20 @@ class TransaksiKeuangan extends Model
                 $sequence = 1;
             }
             
-            // Format: TRX-YYYY-MM-NNNN (URL-safe dengan dash)
+            // Format: TRX-YYYY-MM-NNNN
             return sprintf('TRX-%s-%s-%04d', $year, $month, $sequence);
         });
+        
+        // Check if this number already exists (race condition check)
+        $exists = static::where('nomor_transaksi', $nomorTransaksi)->exists();
+        
+        if ($exists) {
+            // If duplicate, add microsecond timestamp suffix
+            $microtime = (int)(microtime(true) * 10000);
+            $suffix = base_convert($microtime, 10, 36);
+            return sprintf('TRX-%s-%s-%s', $year, $month, strtoupper($suffix));
+        }
+        
+        return $nomorTransaksi;
     }
 }

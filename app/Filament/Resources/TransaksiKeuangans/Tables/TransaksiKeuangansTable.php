@@ -83,6 +83,15 @@ class TransaksiKeuangansTable
                     ->dateTime('d M Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                    
+                TextColumn::make('deleted_at')
+                    ->label('Dihapus')
+                    ->dateTime('d M Y H:i')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('—')
+                    ->badge()
+                    ->color('danger'),
             ])
             ->filters([
                 SelectFilter::make('jenis')
@@ -139,6 +148,12 @@ class TransaksiKeuangansTable
                     ->label('Tahun Ini')
                     ->query(fn (Builder $query): Builder => $query->whereYear('tanggal_transaksi', now()->year))
                     ->toggle(),
+                    
+                // Filter untuk menampilkan data yang sudah dihapus (soft delete)
+                Filter::make('trashed')
+                    ->label('Tampilkan Data Terhapus')
+                    ->query(fn (Builder $query): Builder => $query->onlyTrashed())
+                    ->toggle(),
             ])
             ->recordActions([
                 ViewAction::make(),
@@ -147,8 +162,33 @@ class TransaksiKeuangansTable
                     ->icon('heroicon-o-printer')
                     ->color('secondary')
                     ->url(fn ($record) => route('transaksi.print', $record->id))
-                    ->openUrlInNewTab(),
-                EditAction::make(),
+                    ->openUrlInNewTab()
+                    ->hidden(fn ($record) => $record->trashed()),
+                EditAction::make()
+                    ->hidden(fn ($record) => $record->trashed()),
+                    
+                // Action untuk restore data yang sudah dihapus
+                Action::make('restore')
+                    ->label('Pulihkan')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->action(fn ($record) => $record->restore())
+                    ->visible(fn ($record) => $record->trashed())
+                    ->successNotificationTitle('Transaksi berhasil dipulihkan'),
+                    
+                // Action untuk hapus permanen
+                Action::make('forceDelete')
+                    ->label('Hapus Permanen')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->modalHeading('Hapus Permanen Transaksi')
+                    ->modalDescription('Apakah Anda yakin ingin menghapus transaksi ini secara permanen? Tindakan ini tidak dapat dibatalkan.')
+                    ->modalSubmitActionLabel('Ya, Hapus Permanen')
+                    ->action(fn ($record) => $record->forceDelete())
+                    ->visible(fn ($record) => $record->trashed())
+                    ->successNotificationTitle('Transaksi berhasil dihapus permanen'),
             ])
             ->toolbarActions([
                 ExportAction::make()
@@ -174,6 +214,18 @@ class TransaksiKeuangansTable
                     ]),
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
+                    
+                    // Bulk action untuk restore
+                    \Filament\Actions\RestoreBulkAction::make()
+                        ->label('Pulihkan Terpilih')
+                        ->successNotificationTitle('Transaksi berhasil dipulihkan'),
+                        
+                    // Bulk action untuk force delete
+                    \Filament\Actions\ForceDeleteBulkAction::make()
+                        ->label('Hapus Permanen Terpilih')
+                        ->modalHeading('Hapus Permanen Transaksi Terpilih')
+                        ->modalDescription('Apakah Anda yakin ingin menghapus transaksi terpilih secara permanen? Tindakan ini tidak dapat dibatalkan.')
+                        ->successNotificationTitle('Transaksi berhasil dihapus permanen'),
                 ]),
             ])
             ->defaultSort('tanggal_transaksi', 'desc');

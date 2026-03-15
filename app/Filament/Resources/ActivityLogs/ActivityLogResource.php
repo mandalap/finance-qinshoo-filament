@@ -37,21 +37,20 @@ class ActivityLogResource extends Resource
         if (!$user) {
             return false;
         }
-        
-        // Allow if user has super_admin role OR is user ID 1 (first admin)
-        return $user->hasRole('super_admin') || $user->id === 1;
+
+        // Allow if user has super-admin role
+        return $user->hasRole('super-admin');
     }
 
     // Block direct access if not super admin
     public static function canViewAny(): bool
     {
-        $user = auth()->user();
-        if (!$user) {
-            return false;
-        }
-        
-        // Allow if user has super_admin role OR is user ID 1 (first admin)
-        return $user->hasRole('super_admin') || $user->id === 1;
+        return true; // Allow access but hide navigation for unauthorized users
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()?->hasRole('super-admin') ?? false;
     }
 
     public static function infolist(Schema $schema): Schema

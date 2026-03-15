@@ -13,6 +13,7 @@ class RoleSeeder extends Seeder
         // Create roles
         $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
         $approverRole = Role::firstOrCreate(['name' => 'approver']);
+        $viewerRole = Role::firstOrCreate(['name' => 'viewer']);
 
         // Create or update super-admin user
         $adminUser = User::firstOrCreate(
@@ -42,10 +43,25 @@ class RoleSeeder extends Seeder
             $approverUser->assignRole('approver');
         }
 
+        // Create or update viewer user (hanya bisa melihat)
+        $viewerUser = User::firstOrCreate(
+            ['email' => 'viewer@yayasan.com'],
+            [
+                'name' => 'Viewer Yayasan',
+                'password' => Hash::make('password'),
+            ]
+        );
+
+        // Assign viewer role
+        if (!$viewerUser->hasRole('viewer')) {
+            $viewerUser->assignRole('viewer');
+        }
+
         // Output untuk konfirmasi
         $this->command->info('✅ Roles created successfully!');
         $this->command->info("📧 Super Admin: admin@yayasan.com");
         $this->command->info("📧 Approver: approver@yayasan.com");
+        $this->command->info("📧 Viewer: viewer@yayasan.com");
         $this->command->info("🔑 Default password: password");
     }
 }

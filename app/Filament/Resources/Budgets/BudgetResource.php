@@ -63,4 +63,35 @@ class BudgetResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
+    // Permission menggunakan Spatie Permission
+    public static function canViewAny(): bool
+    {
+        return true; // Allow access but hide navigation for unauthorized users
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->can('view-budget') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('create-budget') ?? false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()?->can('edit-budget') ?? false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()?->can('delete-budget') ?? false;
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()?->can('view-budget') ?? false;
+    }
 }

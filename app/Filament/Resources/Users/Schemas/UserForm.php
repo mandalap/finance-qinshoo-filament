@@ -41,6 +41,7 @@ class UserForm
                     ->options([
                         'super-admin' => 'Super Admin',
                         'approver' => 'Approver',
+                        'viewer' => 'Viewer',
                     ]),
             ]);
     }

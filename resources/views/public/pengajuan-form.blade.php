@@ -284,8 +284,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>Kontak (WhatsApp/Email)</label>
-                        <input type="text" name="kontak" value="{{ old('kontak') }}" placeholder="Opsional">
+                        <label>Kontak (WhatsApp/Email/Nama & Nomor Rekening) <span class="required">*</span></label>
+                        <input type="text" name="kontak" value="{{ old('kontak') }}" required>
                     </div>
                 </div>
                 

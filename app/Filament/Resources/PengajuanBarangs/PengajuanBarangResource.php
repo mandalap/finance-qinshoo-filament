@@ -89,25 +89,30 @@ class PengajuanBarangResource extends Resource
     {
         return false;
     }
-    
+
     public static function canEdit($record): bool
     {
         return false;
     }
-    
+
     public static function canDelete($record): bool
     {
         return false;
     }
-    
-    // Hanya Approver dan Super Admin yang bisa melihat
+
+    // Permission menggunakan Spatie Permission
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasAnyRole(['approver', 'super-admin']) ?? false;
+        return true; // Allow access but hide navigation for unauthorized users
     }
-    
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->can('view-pengajuan') ?? false;
+    }
+
     public static function canView($record): bool
     {
-        return auth()->user()?->hasAnyRole(['approver', 'super-admin']) ?? false;
+        return auth()->user()?->can('view-pengajuan') ?? false;
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\Users\Schemas;
 
-use Filament\Infolists\Components\Section;
+use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -24,8 +24,18 @@ class UserInfolist
                         TextEntry::make('roles.name')
                             ->label('Role')
                             ->badge()
-                            ->color(fn ($state) => $state === 'super-admin' ? 'danger' : 'success')
-                            ->formatStateUsing(fn ($state) => $state === 'super-admin' ? 'Super Admin' : 'Approver'),
+                            ->color(fn ($state) => match($state) {
+                                'super-admin' => 'danger',
+                                'approver' => 'warning',
+                                'viewer' => 'info',
+                                default => 'gray',
+                            })
+                            ->formatStateUsing(fn ($state) => match($state) {
+                                'super-admin' => 'Super Admin',
+                                'approver' => 'Approver',
+                                'viewer' => 'Viewer',
+                                default => $state,
+                            }),
                             
                         TextEntry::make('created_at')
                             ->label('Dibuat')

@@ -65,4 +65,35 @@ class TransaksiKeuanganResource extends Resource
             'edit' => EditTransaksiKeuangan::route('/{record}/edit'),
         ];
     }
+
+    // Permission menggunakan Spatie Permission
+    public static function canViewAny(): bool
+    {
+        return true; // Allow access but hide navigation for unauthorized users
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->can('view-transaksi') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('create-transaksi') ?? false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()?->can('edit-transaksi') ?? false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()?->can('delete-transaksi') ?? false;
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()?->can('view-transaksi') ?? false;
+    }
 }

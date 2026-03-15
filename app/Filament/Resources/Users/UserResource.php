@@ -66,29 +66,34 @@ class UserResource extends Resource
         ];
     }
     
-    // Hanya Super Admin yang bisa akses
+    // Hanya Super Admin yang bisa akses (menggunakan permission)
     public static function canViewAny(): bool
     {
-        return auth()->user()?->hasRole('super-admin') ?? false;
+        return true; // Allow access but hide navigation for unauthorized users
     }
-    
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->can('view-user') ?? false;
+    }
+
     public static function canCreate(): bool
     {
-        return auth()->user()?->hasRole('super-admin') ?? false;
+        return auth()->user()?->can('create-user') ?? false;
     }
-    
+
     public static function canEdit($record): bool
     {
-        return auth()->user()?->hasRole('super-admin') ?? false;
+        return auth()->user()?->can('edit-user') ?? false;
     }
-    
+
     public static function canDelete($record): bool
     {
-        return auth()->user()?->hasRole('super-admin') ?? false;
+        return auth()->user()?->can('delete-user') ?? false;
     }
-    
+
     public static function canView($record): bool
     {
-        return auth()->user()?->hasRole('super-admin') ?? false;
+        return auth()->user()?->can('view-user') ?? false;
     }
 }

@@ -57,4 +57,35 @@ class KategoriTransaksiResource extends Resource
             'edit' => EditKategoriTransaksi::route('/{record}/edit'),
         ];
     }
+
+    // Permission menggunakan Spatie Permission
+    public static function canViewAny(): bool
+    {
+        return true; // Allow access but hide navigation for unauthorized users
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->can('view-kategori') ?? false;
+    }
+
+    public static function canCreate(): bool
+    {
+        return auth()->user()?->can('create-kategori') ?? false;
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()?->can('edit-kategori') ?? false;
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()?->can('delete-kategori') ?? false;
+    }
+
+    public static function canView($record): bool
+    {
+        return auth()->user()?->can('view-kategori') ?? false;
+    }
 }

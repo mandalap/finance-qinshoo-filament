@@ -75,10 +75,6 @@ class RoleResource extends Resource
 
     public static function canEdit($record): bool
     {
-        // Tidak bisa edit super-admin role
-        if ($record->name === 'super-admin') {
-            return false;
-        }
         return auth()->user()?->hasRole('super-admin') ?? false;
     }
 
